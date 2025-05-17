@@ -11,7 +11,15 @@ def manhattan_distance(state: List[int]) -> int:
         abs((state.index(val) // 3) - goal_pos[val][1])
         for val in state if val != 0
     )
+import random
 
+def generate_random_state():
+    """Tạo trạng thái ngẫu nhiên hợp lệ cho 8-puzzle"""
+    state = list(range(9))
+    while True:
+        random.shuffle(state)
+        if is_solvable(state):
+            return state
 def get_next_states(state: List[int]) -> List[Tuple[List[int], Tuple[int, int]]]:
     zero_idx = state.index(0)
     moves = [-3, 3, -1, 1]

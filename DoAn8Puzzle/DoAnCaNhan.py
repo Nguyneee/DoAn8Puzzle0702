@@ -5,8 +5,9 @@ import random
 import math
 from collections import deque
 from typing import List, Tuple, Optional
-from .algorithms import ac3, and_or_search, bfs_solve, constraint_checking_solve, create_consistent_state, create_constraints, dfs_solve, find_solution_path, perform_ac3_with_solution, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
-from .algorithms import backtracking_csp, ac3_solve, genetic_algorithm_solve, q_learning_solve
+from DoAn8Puzzle.algorithms import ac3, and_or_search, bfs_solve, constraint_checking_solve, create_consistent_state, create_constraints, dfs_solve, find_solution_path, perform_ac3_with_solution, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
+from DoAn8Puzzle.algorithms import backtracking_csp, ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve
+from DoAn8Puzzle.utils import generate_fixed_puzzle
 class PuzzleSolver:
     """Lớp chính quản lý việc giải 8-Puzzle"""
     def __init__(self):
@@ -48,7 +49,7 @@ class PuzzleSolver:
         self.BOARD_SIZE = 3
 
         # Trạng thái game
-        self.original_state = self.generate_fixed_puzzle()
+        self.original_state = generate_fixed_puzzle()
         self.start_state = self.original_state.copy()
         self.goal_state = list(range(1, 9)) + [0]
         
@@ -63,77 +64,29 @@ class PuzzleSolver:
 
         # Ánh xạ thuật toán
         self.ALGORITHMS = {
-            "BFS": self.bfs_solve,
-            "DFS": self.dfs_solve,
-            "UCS": self.ucs_solve,
-            "IDDFS": self.iddfs_solve,
-            "Greedy": self.greedy_solve,
-            "A*": self.astar_solve,
-            "IDA*": self.ida_star_solve,
-            "Hill": self.hill_climbing_solve,
-            "Steepest Ascent": self.steepest_ascent_hill_climbing_solve,
-            "And-Or": self.and_or_solve,
-            "Observation": self.observation_search_solve,
-            "Partial Obs": self.partial_observable_search_solve,
-            "No Obs": self.no_observation_search_solve, 
-            "Stochastic": self.stochastic_hill_climbing_solve,
-            "SimulatedAnnealing": self.simulated_annealing_solve,
-            "Beam": self.beam_search_solve,
-            "Backtracking CSP": self.backtracking_csp_solve,
-            "Const Checking": self.constraint_checking_solve,
-            "AC3": self.ac3_solve,
-            "Genetic": self.genetic_algorithm_solve,
-            "Q-Learning": self.q_learning_solve,
-            "Reset": "reset"
-        }
-
-
-
-
-
-###Utils Functions###
-    def generate_fixed_puzzle(self) -> List[int]:
-        """Tạo trạng thái ban đầu của puzzle"""
-        return [2,6,5,0,8,7,4,3,1] #[2,3,6,1,5,0,4,7,8]
-
-    def manhattan_distance(self, state: List[int]) -> int:
-        """Tính khoảng cách Manhattan"""
-        goal_pos = {val: (idx % 3, idx // 3) for idx, val in enumerate(range(1, 9))}
-        goal_pos[0] = (2, 2)
-        return sum(
-            abs((state.index(val) % 3) - goal_pos[val][0]) +
-            abs((state.index(val) // 3) - goal_pos[val][1])
-            for val in state if val != 0
-        )
-
-    def get_next_states(self, state: List[int]) -> List[Tuple[List[int], Tuple[int, int]]]:
-        """Sinh các trạng thái kế tiếp"""
-        zero_idx = state.index(0)
-        moves = [-3, 3, -1, 1]
-        next_states = []
-        for move in moves:
-            new_idx = zero_idx + move
-            if 0 <= new_idx < 9 and (
-                (move in [-1, 1] and zero_idx // 3 == new_idx // 3) or
-                (move in [-3, 3])
-            ):
-                new_state = state.copy()
-                new_state[zero_idx], new_state[new_idx] = new_state[new_idx], new_state[zero_idx]
-                next_states.append((new_state, (zero_idx, new_idx)))
-        return next_states
-    def is_solvable(self, state):
-        """Kiểm tra trạng thái có giải được không (dựa trên inversion count)"""
-        inversions = 0
-        for i in range(len(state)):
-            if state[i] == 0:
-                continue
-            for j in range(i + 1, len(state)):
-                if state[j] != 0 and state[i] > state[j]:
-                    inversions += 1
-        return inversions % 2 == 0
-
-
-
+                    "BFS": bfs_solve,
+                    "DFS": dfs_solve,
+                    "UCS": ucs_solve,
+                    "IDDFS": iddfs_solve,
+                    "Greedy": greedy_solve,
+                    "A*": astar_solve,
+                    "IDA*": idastar_solve,
+                    "Hill": hill_climbing_solve,
+                    "Steepest Ascent": steepest_ascent_hill_climbing_solve,
+                    "Stochastic": stochastic_hill_climbing_solve,
+                    "SimulatedAnnealing": simulated_annealing_solve,
+                    "Beam": beam_search_solve,
+                    "And-Or": and_or_search,
+                    "No Obs": no_observation_search,
+                    "Partial Obs": partial_observable_search,
+                    "Backtracking CSP": backtracking_csp,
+                    "Const Checking": constraint_checking_solve,
+                    "AC3": ac3_solve,
+                    "Genetic": genetic_algorithm_solve,
+                    "Q-Learning": q_learning_solve,
+                    "TD Learning": td_learning_solve,
+                    "Reset": "reset"
+                }
 #####GUI Functions#####
     def draw_board(self):
         """Vẽ bảng puzzle"""
@@ -484,41 +437,30 @@ class PuzzleSolver:
                                 execution_time = 0
                                 
                             if name == "Show Log":
-                                try:
-                                    with open("solution_log.txt", "w", encoding="utf-8") as f:
-                                        f.write(f"Thuật toán: {self.selected_algorithm_name}\n")
-                                        f.write(f"Số bước: {len(self.solution)}\n")
-                                        f.write(f"Thời gian: {self.elapsed_time:.4f} giây\n")
-                                        f.write(f"Số node mở rộng: {self.expanded_nodes}\n\n")
+                                if self.solution and self.algorithm_name:
+                                    try:
+                                        with open("solution_log.txt", "w", encoding="utf-8") as f:
+                                            f.write(f"Thuật toán: {self.algorithm_name}\n")
+                                            f.write(f"Số bước: {len(self.solution)}\n")
+                                            f.write(f"Thời gian: {execution_time:.4f} giây\n\n")
 
-                                        temp_state = self.original_state[:]
-                                        for i, move in enumerate(self.solution):
-                                            zero, swap = move
-                                            temp_state[zero], temp_state[swap] = temp_state[swap], temp_state[zero]
-                                            f.write(f"Bước {i}:\n")
-                                            for r in range(3):
-                                                row_str = " ".join(
-                                                    str(temp_state[r * 3 + c]) if temp_state[r * 3 + c] != 0 else "_"
-                                                    for c in range(3)
-                                                )
-                                                f.write(row_str + "\n")
-                                            f.write("\n")
-                                    print("📄 Đã ghi log vào file solution_log.txt")
-
-                                    import os
-                                    import platform
-                                    filepath = "solution_log.txt"
-                                    if platform.system() == "Darwin":
-                                        os.system(f"open {filepath}")
-                                    elif platform.system() == "Windows":
-                                        os.startfile(filepath)
-                                    else:
-                                        os.system(f"xdg-open {filepath}")
-
-                                except Exception as e:
-                                    print("❌ Lỗi khi ghi log:", e)
-                            else:
-                                print("⚠️ Không có lời giải để ghi log.")
+                                            temp_state = self.original_state[:]
+                                            for i, move in enumerate(self.solution):
+                                                zero, swap = move
+                                                temp_state[zero], temp_state[swap] = temp_state[swap], temp_state[zero]
+                                                f.write(f"Bước {i}:\n")
+                                                for r in range(3):
+                                                    row_str = " ".join(
+                                                        str(temp_state[r * 3 + c]) if temp_state[r * 3 + c] != 0 else "_"
+                                                        for c in range(3)
+                                                    )
+                                                    f.write(row_str + "\n")
+                                                f.write("\n")
+                                        print("📄 Đã ghi log vào file solution_log.txt")
+                                    except Exception as e:
+                                        print("❌ Lỗi khi ghi log:", e)
+                                else:
+                                    print("⚠️ Không có lời giải để ghi log.")
                             if name == "exit_app":
                                 self.running = False
                             if name == "speed_cycle":
