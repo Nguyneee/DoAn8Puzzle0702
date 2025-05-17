@@ -1,12 +1,13 @@
 import pygame
 import heapq
+import os
 import time
 import random
 import math
 from collections import deque
 from typing import List, Tuple, Optional
 from DoAn8Puzzle.algorithms import ac3, and_or_search, bfs_solve, constraint_checking_solve, create_consistent_state, create_constraints, dfs_solve, find_solution_path, perform_ac3_with_solution, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
-from DoAn8Puzzle.algorithms import backtracking_csp, ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve
+from DoAn8Puzzle.algorithms import backtracking_csp, ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve, backtracking_search_solve
 from DoAn8Puzzle.utils import generate_fixed_puzzle
 class PuzzleSolver:
     """Lớp chính quản lý việc giải 8-Puzzle"""
@@ -24,6 +25,9 @@ class PuzzleSolver:
         self.speed_names = ["Slow", "Medium", "Fast"]
         self.speed_index = 0
         self.step_delay = self.speed_levels[self.speed_index]
+        self.log_lines = []         # Danh sách dòng log
+        self.show_log_mode = False  # Cờ hiển thị log
+
 
         # Cấu hình màu sắc
         self.COLORS = {
@@ -79,7 +83,7 @@ class PuzzleSolver:
                     "And-Or": and_or_search,
                     "No Obs": no_observation_search,
                     "Partial Obs": partial_observable_search,
-                    "Backtracking CSP": backtracking_csp,
+                    "Backtracking": backtracking_search_solve,
                     "Const Checking": constraint_checking_solve,
                     "AC3": ac3_solve,
                     "Genetic": genetic_algorithm_solve,
@@ -120,7 +124,15 @@ class PuzzleSolver:
     def draw_buttons(self):
         """Vẽ các nút thuật toán"""
         algorithms = list(self.ALGORITHMS.keys())
-        algorithms.remove("Reset")
+
+        # ✅ Kiểm tra có tồn tại mới xóa
+        if "Reset" in algorithms:
+            algorithms.remove("Reset")
+        if "Show Log" in algorithms:
+            algorithms.remove("Show Log")
+
+        # ✅ Đưa 2 nút này về cuối danh sách
+        algorithms.append("Show Log")
         algorithms.append("Reset")
         
         
@@ -233,7 +245,9 @@ class PuzzleSolver:
                     else:
                         active = False
                     color = color_active if active else color_inactive
-
+                if event.type == pygame.KEYDOWN:
+                    if self.show_log_mode:
+                        self.show_log_mode = False  # Ẩn log khi bấm phím bất kỳ
                 if event.type == pygame.KEYDOWN and active:
                     if event.key == pygame.K_RETURN:
                         try:
@@ -331,7 +345,18 @@ class PuzzleSolver:
                 move_text = info_font.render(f"{start_idx + i + 1}: {direction}", True, self.COLORS['TEXT_BLACK'])
                 self.WINDOW.blit(move_text, (table_x + 200, table_y + 70 + i * 20))
     
-    
+    def draw_log_overlay(self):
+        overlay = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))  # Nền mờ đen
+
+        font = pygame.font.SysFont("Courier", 20)
+        line_height = 25
+        x, y = 50, 50
+
+        for line in self.log_lines:
+            text_surface = font.render(line, True, (20, 20, 20))  # Đen đậm (hoặc xanh navy nếu muốn)
+            self.WINDOW.blit(text_surface, (x, y))
+            y += line_height
     
     
     ####Algorithm Functions###
@@ -416,15 +441,38 @@ class PuzzleSolver:
                             if name == "backtrack_random":
                                 self.algorithm_name = "Backtracking"
                                 self.start_time = time.time()
-                                self.solution = self.backtracking_search_solve(self.start_state.copy())
+                                result = backtracking_csp()
                                 self.end_time = time.time()
                                 execution_time = self.end_time - self.start_time
-                                if self.solution is None:
-                                    print("❌ Không tìm được lời giải bằng Backtracking.")
-                                else:
+
+                                if result and result["solution"]:
+                                    raw_path = result["path"]
+                                    converted = []
+
+                                    for i in range(1, len(raw_path)):
+                                        prev = raw_path[i - 1]
+                                        curr = raw_path[i]
+
+                                        # Nếu là lưới 3x3 → flatten
+                                        if isinstance(prev[0], list):
+                                            prev = [num for row in prev for num in row]
+                                        if isinstance(curr[0], list):
+                                            curr = [num for row in curr for num in row]
+
+                                        if 0 in prev and 0 in curr:
+                                            zero_prev = prev.index(0)
+                                            zero_curr = curr.index(0)
+                                            converted.append((zero_prev, zero_curr))
+
+                                    self.solution = converted
+                                    self.start_state = [num for row in result["solution"] for num in row]
+                                    if len(self.start_state) < 9:
+                                        self.start_state.append(0)
                                     print("✅ Backtracking tìm thấy đường đi.")
                                     self.solving = True
                                     self.step_count = 0
+                                else:
+                                    print("❌ Không tìm được lời giải bằng Backtracking.")
                             if name == "Reset":
                                 # RESET
                                 self.start_state = self.original_state.copy()
@@ -443,20 +491,17 @@ class PuzzleSolver:
                                             f.write(f"Thuật toán: {self.algorithm_name}\n")
                                             f.write(f"Số bước: {len(self.solution)}\n")
                                             f.write(f"Thời gian: {execution_time:.4f} giây\n\n")
-
                                             temp_state = self.original_state[:]
                                             for i, move in enumerate(self.solution):
                                                 zero, swap = move
                                                 temp_state[zero], temp_state[swap] = temp_state[swap], temp_state[zero]
-                                                f.write(f"Bước {i}:\n")
+                                                f.write(f"Bước {i+1}:\n")
                                                 for r in range(3):
-                                                    row_str = " ".join(
-                                                        str(temp_state[r * 3 + c]) if temp_state[r * 3 + c] != 0 else "_"
-                                                        for c in range(3)
-                                                    )
-                                                    f.write(row_str + "\n")
+                                                    row = " ".join(str(temp_state[r * 3 + c]) if temp_state[r * 3 + c] != 0 else "_" for c in range(3))
+                                                    f.write(row + "\n")
                                                 f.write("\n")
                                         print("📄 Đã ghi log vào file solution_log.txt")
+                                        os.startfile("solution_log.txt")  # ✅ Mở ngay file sau khi ghi
                                     except Exception as e:
                                         print("❌ Lỗi khi ghi log:", e)
                                 else:
@@ -512,7 +557,8 @@ class PuzzleSolver:
                 else:
                     self.solving = False
                     self.current_move = None  # ✅ Sau khi giải xong thì bỏ highlight
-
+            if self.show_log_mode:
+                self.draw_log_overlay()
             # Cập nhật màn hình
             pygame.display.flip()
             self.clock.tick(100)

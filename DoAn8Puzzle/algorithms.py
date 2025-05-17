@@ -362,7 +362,7 @@ def simulated_annealing_solve(start_state):
     state = start_state[:]
     path = []
     goal = list(range(1, 9)) + [0]
-    T = 200.0 # Nhiệt độ ban đầu
+    T = 150.0 # Nhiệt độ ban đầu
     alpha = 0.99 # Hệ số làm mát
     min_temp = 0.1 # Nhiệt độ tối thiểu
 
@@ -1903,3 +1903,22 @@ def td_learning_solve(start_state, episodes=5000, alpha=0.2, gamma=0.9, epsilon=
     
     # Trả về đường đi nếu có hoặc None nếu không tìm được
     return path if path else None
+def backtracking_search_solve(start_state):
+    goal = list(range(1, 9)) + [0]
+    path = []
+
+    def dfs(state, visited):
+        if state == goal:
+            return True
+        visited.add(tuple(state))
+        for new_state, move in get_next_states(state):
+            if tuple(new_state) not in visited:
+                path.append(move)
+                if dfs(new_state, visited):
+                    return True
+                path.pop()
+        return False
+
+    visited = set()
+    found = dfs(start_state, visited)
+    return path if found else None
