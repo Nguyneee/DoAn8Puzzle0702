@@ -6,7 +6,7 @@ import random
 import math
 from collections import deque
 from typing import List, Tuple, Optional
-from DoAn8Puzzle.algorithms import and_or_search, bfs_solve, constraint_checking_solve, dfs_solve, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
+from DoAn8Puzzle.algorithms import and_or_solve, bfs_solve, constraint_checking_solve, dfs_solve, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
 from DoAn8Puzzle.algorithms import  ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve, backtracking_search_solve
 from DoAn8Puzzle.utils import generate_fixed_puzzle
 class PuzzleSolver:
@@ -81,7 +81,7 @@ class PuzzleSolver:
                     "Stochastic": stochastic_hill_climbing_solve,
                     "SimulatedAnnealing": simulated_annealing_solve,
                     "Beam": beam_search_solve,
-                    "And-Or": and_or_search,
+                    "And-Or": and_or_solve,
                     "No Obs": no_observation_search,
                     "Partial Obs": partial_observable_search,
                     "Backtracking": backtracking_search_solve,

@@ -449,128 +449,40 @@ def beam_search_solve(start_state, beam_width=2):
 
     return None  # Không tìm thấy lời giải
 
-def and_or_search(max_depth=20):
-    """
-    AND-OR Search: Một thuật toán tìm kiếm cho môi trường phức tạp trong 8-puzzle.
-    Thuật toán sẽ tạo một kế hoạch có thể giải quyết mọi khả năng xảy ra trong môi trường.
-    """
-    import random
-    import sys
-    from .utils import is_solvable, manhattan_distance
-    
-    # Tăng giới hạn đệ quy để tránh lỗi stack overflow
-    sys.setrecursionlimit(10000)
 
-    # Trạng thái đích
-    goal_state = list(range(1, 9)) + [0]
-    
-    # Tạo một trạng thái ban đầu ngẫu nhiên có thể giải được
-    while True:
-        start_state = list(random.sample(range(9), 9))
-        if is_solvable(start_state) and start_state != goal_state:
-            break
-    
-    # Lưu tất cả các trạng thái đã thăm để tránh lặp vô hạn
+
+def and_or_solve( start_state):
+    """
+    Giải 8-puzzle bằng thuật toán And-Or Graph Search.
+    Trả về danh sách các bước di chuyển [(zero_idx, swap_idx), ...]
+    """
     visited = set()
-    visited.add(tuple(start_state))
-    
-    # Lưu đường đi để hiển thị
-    solution_path = [start_state]
-    best_path = None
-    best_path_length = float('inf')
-    
-    def get_valid_moves(state):
-        """Tìm các nước đi hợp lệ từ trạng thái hiện tại"""
-        zero_idx = state.index(0)
-        valid_moves = []
-        
-        # Kiểm tra 4 hướng di chuyển: lên, xuống, trái, phải
-        if zero_idx >= 3:  # Có thể đi lên
-            valid_moves.append((zero_idx, zero_idx - 3))
-        if zero_idx < 6:  # Có thể đi xuống
-            valid_moves.append((zero_idx, zero_idx + 3))
-        if zero_idx % 3 > 0:  # Có thể đi trái
-            valid_moves.append((zero_idx, zero_idx - 1))
-        if zero_idx % 3 < 2:  # Có thể đi phải
-            valid_moves.append((zero_idx, zero_idx + 1))
-            
-        return valid_moves
-    
-    def apply_move(state, move):
-        """Áp dụng nước đi và trả về trạng thái mới"""
-        zero_idx, swap_idx = move
-        new_state = state.copy()
-        new_state[zero_idx], new_state[swap_idx] = new_state[swap_idx], new_state[zero_idx]
-        return new_state
-    
-    def dfs_with_limit(state, depth, path):
-        """Tìm kiếm theo chiều sâu với giới hạn độ sâu"""
-        nonlocal best_path, best_path_length
-        
-        # Nếu đạt trạng thái đích
-        if state == goal_state:
-            if len(path) < best_path_length:
-                best_path = path.copy()
-                best_path_length = len(path)
-            return True
-        
-        # Nếu vượt quá độ sâu tối đa
-        if depth >= max_depth:
-            return False
-        
-        # Lấy các nước đi hợp lệ và sắp xếp theo heuristic (tốt nhất trước)
-        valid_moves = get_valid_moves(state)
-        
-        # Thử từng nước đi
-        for move in valid_moves:
-            new_state = apply_move(state, move)
-            tuple_state = tuple(new_state)
-            
-            # Nếu trạng thái mới chưa thăm
-            if tuple_state not in visited:
-                visited.add(tuple_state)
-                
-                # Thêm vào đường đi
-                path.append(move)
-                solution_path.append(new_state)
-                
-                # Tiếp tục tìm kiếm từ trạng thái mới
-                if dfs_with_limit(new_state, depth + 1, path):
-                    return True
-                
-                # Quay lui nếu không tìm thấy đường đi
-                path.pop()
-                solution_path.pop()
-        
-        return False
-    
-    # Bắt đầu tìm kiếm với chiều sâu tăng dần để đảm bảo tìm được đường đi ngắn nhất
-    found = False
-    for limit in range(5, max_depth + 5, 5):
-        # Reset để thử với độ sâu mới
-        visited = set()
-        visited.add(tuple(start_state))
-        solution_path = [start_state]
-        
-        # Thử tìm kiếm với giới hạn mới
-        if dfs_with_limit(start_state, 0, []):
-            found = True
-            print(f"Tìm thấy đường đi với độ sâu {limit}")
-            break
-    
-    if found and best_path:
-        return {
-            "start": start_state,
-            "path": solution_path,
-            "moves": best_path
-        }
-    else:
-        return {
-            "start": start_state,
-            "path": [start_state],
-            "moves": None
-        }
-    
+    goal = list(range(1, 9)) + [0]
+    MAX_DEPTH = 30
+
+    def recursive_search(state, depth=0):
+        if state == goal:
+            return []
+
+        if depth >= MAX_DEPTH:
+            return None
+
+        state_tuple = tuple(state)
+        if state_tuple in visited:
+            return None
+        visited.add(state_tuple)
+
+        for new_state, move in get_next_states(state):
+            sub_path = recursive_search(new_state, depth + 1)
+            if sub_path is not None:
+                return [move] + sub_path
+
+        return None
+
+    if not is_solvable(start_state):
+        return None
+
+    return recursive_search(start_state)
 
 from itertools import permutations
 from collections import deque

@@ -1,7 +1,8 @@
 from typing import List, Tuple
 
 def generate_fixed_puzzle() -> List[int]:
-    return [2,6,5,0,8,7,4,3,1]
+    return [2,3,6,1,5,0,4,7,8]
+# [2,6,5,0,8,7,4,3,1]
 # [2,3,6,1,5,0,4,7,8]
 def manhattan_distance(state: List[int]) -> int:
     goal_pos = {val: (idx % 3, idx // 3) for idx, val in enumerate(range(1, 9))}
