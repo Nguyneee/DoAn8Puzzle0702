@@ -6,8 +6,8 @@ import random
 import math
 from collections import deque
 from typing import List, Tuple, Optional
-from DoAn8Puzzle.algorithms import ac3, and_or_search, bfs_solve, constraint_checking_solve, create_consistent_state, create_constraints, dfs_solve, find_solution_path, perform_ac3_with_solution, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
-from DoAn8Puzzle.algorithms import backtracking_csp, ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve, backtracking_search_solve
+from DoAn8Puzzle.algorithms import and_or_search, bfs_solve, constraint_checking_solve, dfs_solve, ucs_solve, greedy_solve, iddfs_solve, astar_solve, idastar_solve, hill_climbing_solve, steepest_ascent_hill_climbing_solve, stochastic_hill_climbing_solve, simulated_annealing_solve, beam_search_solve, no_observation_search
+from DoAn8Puzzle.algorithms import  ac3_solve, genetic_algorithm_solve, q_learning_solve,partial_observable_search, td_learning_solve, backtracking_search_solve
 from DoAn8Puzzle.utils import generate_fixed_puzzle
 class PuzzleSolver:
     """Lớp chính quản lý việc giải 8-Puzzle"""
@@ -180,11 +180,6 @@ class PuzzleSolver:
             exit_text = self.FONTS['BUTTON'].render("Exit", True, self.COLORS['TEXT_BLACK'])
             self.WINDOW.blit(exit_text, exit_rect.move(25, 10))
             button_positions.append((exit_rect, "exit_app"))
-            random_rect = pygame.Rect(350, self.HEIGHT - 60, 150, 40)
-            pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], random_rect, border_radius=6)
-            random_text = self.FONTS['BUTTON'].render("Random", True, self.COLORS['TEXT_BLACK'])
-            self.WINDOW.blit(random_text, random_rect.move(30, 10))
-            button_positions.append((random_rect, "backtrack_random"))
         
         return button_positions
     def draw_state_tables(self):
@@ -438,41 +433,7 @@ class PuzzleSolver:
                     # Các sự kiện khác như cũ
                     for rect, name in button_positions:
                         if rect.collidepoint(event.pos):
-                            if name == "backtrack_random":
-                                self.algorithm_name = "Backtracking"
-                                self.start_time = time.time()
-                                result = backtracking_csp()
-                                self.end_time = time.time()
-                                execution_time = self.end_time - self.start_time
-
-                                if result and result["solution"]:
-                                    raw_path = result["path"]
-                                    converted = []
-
-                                    for i in range(1, len(raw_path)):
-                                        prev = raw_path[i - 1]
-                                        curr = raw_path[i]
-
-                                        # Nếu là lưới 3x3 → flatten
-                                        if isinstance(prev[0], list):
-                                            prev = [num for row in prev for num in row]
-                                        if isinstance(curr[0], list):
-                                            curr = [num for row in curr for num in row]
-
-                                        if 0 in prev and 0 in curr:
-                                            zero_prev = prev.index(0)
-                                            zero_curr = curr.index(0)
-                                            converted.append((zero_prev, zero_curr))
-
-                                    self.solution = converted
-                                    self.start_state = [num for row in result["solution"] for num in row]
-                                    if len(self.start_state) < 9:
-                                        self.start_state.append(0)
-                                    print("✅ Backtracking tìm thấy đường đi.")
-                                    self.solving = True
-                                    self.step_count = 0
-                                else:
-                                    print("❌ Không tìm được lời giải bằng Backtracking.")
+                            
                             if name == "Reset":
                                 # RESET
                                 self.start_state = self.original_state.copy()
