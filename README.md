@@ -3,6 +3,11 @@
   <h1>8-Puzzle Solver Agent 🧩</h1>
   <p>Trò chơi giải đố 8-puzzle với nhiều nhóm thuật toán tìm kiếm AI</p>
 
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.x-blue.svg" alt="Python 3.x"></a>
+  <a href="https://www.pygame.org/"><img src="https://img.shields.io/badge/pygame-2.x-green.svg" alt="Pygame"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</div>
+
 ---
 
 # BÁO CÁO TỔNG KẾT DỰ ÁN
