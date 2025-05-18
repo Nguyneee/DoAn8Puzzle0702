@@ -27,6 +27,7 @@ class PuzzleSolver:
         self.step_delay = self.speed_levels[self.speed_index]
         self.log_lines = []         # Danh sách dòng log
         self.show_log_mode = False  # Cờ hiển thị log
+        self.result_table_data = []
 
 
         # Cấu hình màu sắc
@@ -122,66 +123,88 @@ class PuzzleSolver:
                 self.WINDOW.blit(text, text_rect)
         
     def draw_buttons(self):
-        """Vẽ các nút thuật toán"""
-        algorithms = list(self.ALGORITHMS.keys())
+        """Vẽ các nhóm thuật toán tách biệt theo 6 nhóm"""
+        grouped_algorithms = {
+            "Uninformed": ["BFS", "DFS", "UCS", "IDDFS"],
+            "Informed": ["Greedy", "A*", "IDA*"],
+            "Local ": ["Hill", "Steepest Ascent", "Stochastic", "SimulatedAnnealing", "Beam", "Genetic"],
+            "CSP": ["Backtracking", "Const Checking", "AC3"],
+            "Complex": ["And-Or", "No Obs", "Partial Obs"],
+            "Reinforce": ["Q-Learning", "TD Learning"]
+        }
 
-        # ✅ Kiểm tra có tồn tại mới xóa
-        if "Reset" in algorithms:
-            algorithms.remove("Reset")
-        if "Show Log" in algorithms:
-            algorithms.remove("Show Log")
-
-        # ✅ Đưa 2 nút này về cuối danh sách
-        algorithms.append("Show Log")
-        algorithms.append("Reset")
-        
-        
         x_start, y_start = 20, 50
-        btn_width, btn_height = 120, 40
-        spacing_x, spacing_y = btn_width + 10, btn_height + 10
-        
-        # Vẽ tiêu đề
-        title = self.FONTS['TITLE'].render("Algorithm", True, self.COLORS['TEXT_BLACK'])
-        self.WINDOW.blit(title, (x_start, 10))
-        
+        btn_width, btn_height = 130, 40
+        spacing_x, spacing_y = btn_width + 15, btn_height + 10
+
         button_positions = []
-        for i, name in enumerate(algorithms):
-            x = x_start + (i // 5) * (spacing_x + 20)
-            y = y_start + (i % 5) * spacing_y
-            
-            # Màu nút
-            color = self.COLORS['BUTTON_DEFAULT']
-            if self.algorithm_name == name:
-                color = self.COLORS['BUTTON_HIGHLIGHT']
-            
-            # Vẽ nút
-            rect = pygame.Rect(x, y, btn_width, btn_height)
-            pygame.draw.rect(self.WINDOW, color, rect, border_radius=6)
-            
-            # Chữ nút
-            text = self.FONTS['BUTTON'].render(name, True, self.COLORS['TEXT_BLACK'])
-            text_rect = text.get_rect(center=rect.center)
-            self.WINDOW.blit(text, text_rect)
-            
-            button_positions.append((rect, name))
-            # Nút đổi tốc độ
-            speed_rect = pygame.Rect(20, self.HEIGHT - 60, 150, 40)
-            color = self.COLORS['BUTTON_HIGHLIGHT']
-            pygame.draw.rect(self.WINDOW, color, speed_rect, border_radius=6)
+        col = 0
+        # Danh sách nhóm & số lượng thuật toán mỗi nhóm
+        group_titles = ["Uninformed", "Informed", "Local Search", "CSP", "Complex Env", "Reinforcement"]
+        group_counts = [4, 3, 5, 3, 3, 2]  # số nút mỗi nhóm
+        group_positions = []
 
-            speed_label = f"Speed: {self.speed_names[self.speed_index]}"
-            speed_text = self.FONTS['BUTTON'].render(speed_label, True, self.COLORS['TEXT_BLACK'])
-            self.WINDOW.blit(speed_text, speed_rect.move(10, 10))
+        x_start = 20
+        btn_width = 120
+        spacing_x = btn_width + 10
 
-            button_positions.append((speed_rect, "speed_cycle"))
-            
-            exit_rect = pygame.Rect(self.WIDTH - 170, self.HEIGHT - 60, 120, 40)
-            pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], exit_rect, border_radius=6)
-            exit_text = self.FONTS['BUTTON'].render("Exit", True, self.COLORS['TEXT_BLACK'])
-            self.WINDOW.blit(exit_text, exit_rect.move(25, 10))
-            button_positions.append((exit_rect, "exit_app"))
-        
+        # Tính center x của từng nhóm
+        acc = 0
+        for count in group_counts:
+            center = x_start + acc * spacing_x + (count - 1) * spacing_x // 2
+            group_positions.append(center)
+            acc += count
+        for group_name, algos in grouped_algorithms.items():
+            # Vẽ tiêu đề nhóm
+            title = self.FONTS['TITLE'].render(group_name, True, self.COLORS['TEXT_BLACK'])
+            title_rect = title.get_rect(center=(x_start + col * spacing_x + btn_width // 2, y_start - 20))
+            self.WINDOW.blit(title, title_rect)
+
+            for i, name in enumerate(algos):
+                x = x_start + col * spacing_x
+                y = y_start + i * spacing_y
+
+                rect = pygame.Rect(x, y, btn_width, btn_height)
+                color = self.COLORS['BUTTON_HIGHLIGHT'] if self.algorithm_name == name else self.COLORS['BUTTON_DEFAULT']
+                pygame.draw.rect(self.WINDOW, color, rect, border_radius=6)
+                text = self.FONTS['BUTTON'].render(name, True, self.COLORS['TEXT_BLACK'])
+                text_rect = text.get_rect(center=rect.center)
+                self.WINDOW.blit(text, text_rect)
+                button_positions.append((rect, name))
+
+            col += 1
+
+        # ===== Nút phụ =====
+        # Speed
+        speed_rect = pygame.Rect(20, self.HEIGHT - 60, 150, 40)
+        pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_HIGHLIGHT'], speed_rect, border_radius=6)
+        speed_label = f"Speed: {self.speed_names[self.speed_index]}"
+        speed_text = self.FONTS['BUTTON'].render(speed_label, True, self.COLORS['TEXT_BLACK'])
+        self.WINDOW.blit(speed_text, speed_rect.move(10, 10))
+        button_positions.append((speed_rect, "speed_cycle"))
+
+        # Reset
+        reset_rect = pygame.Rect(200, self.HEIGHT - 60, 120, 40)
+        pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], reset_rect, border_radius=6)
+        self.WINDOW.blit(self.FONTS['BUTTON'].render("Reset", True, self.COLORS['TEXT_BLACK']), reset_rect.move(25, 10))
+        button_positions.append((reset_rect, "Reset"))
+
+        # Show Log
+        log_rect = pygame.Rect(340, self.HEIGHT - 60, 150, 40)
+        pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], log_rect, border_radius=6)
+        self.WINDOW.blit(self.FONTS['BUTTON'].render("Show Log", True, self.COLORS['TEXT_BLACK']), log_rect.move(30, 10))
+        button_positions.append((log_rect, "Show Log"))
+
+        # Exit
+        exit_rect = pygame.Rect(self.WIDTH - 170, self.HEIGHT - 60, 120, 40)
+        pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], exit_rect, border_radius=6)
+        exit_text = self.FONTS['BUTTON'].render("Exit", True, self.COLORS['TEXT_BLACK'])
+        self.WINDOW.blit(exit_text, exit_rect.move(25, 10))
+        button_positions.append((exit_rect, "exit_app"))
+
         return button_positions
+            
+    
     def draw_state_tables(self):
         """Vẽ bảng trạng thái ban đầu và đích"""
         tile_size = 80
@@ -284,7 +307,7 @@ class PuzzleSolver:
         
         # Vị trí của bảng solution
         table_x = 50
-        table_y = self.HEIGHT - 200
+        table_y = self.HEIGHT - 270
         
         # Tạo nền mờ cho bảng
         solution_surface = pygame.Surface((400, 180), pygame.SRCALPHA)
@@ -352,6 +375,27 @@ class PuzzleSolver:
             text_surface = font.render(line, True, (20, 20, 20))  # Đen đậm (hoặc xanh navy nếu muốn)
             self.WINDOW.blit(text_surface, (x, y))
             y += line_height
+    def draw_result_table(self, results):
+        """Vẽ bảng thống kê kết quả các thuật toán"""
+        if not results:
+            return
+
+        table_x = 500  # Có thể điều chỉnh cho hợp giao diện
+        table_y = self.HEIGHT - 270
+        cell_width = 140
+        cell_height = 35
+
+        header = ["Algorithm", "Time (s)", "Expansions", "Steps"]
+        rows = [header] + results
+
+        font = pygame.font.SysFont("Arial", 22, bold=True)
+        pygame.draw.rect(self.WINDOW, (180, 180, 200), (table_x, table_y, cell_width * 4, cell_height * len(rows)), border_radius=8)
+
+        for i, row in enumerate(rows):
+            for j, item in enumerate(row):
+                text = font.render(str(item), True, self.COLORS['TEXT_BLACK'])
+                self.WINDOW.blit(text, (table_x + j * cell_width + 10, table_y + i * cell_height + 8))
+
     
     
     ####Algorithm Functions###
@@ -378,6 +422,7 @@ class PuzzleSolver:
             # Vẽ bảng solution nếu có giải pháp
             if self.solution:
                 self.draw_solution_table(execution_time)
+                self.draw_result_table(self.result_table_data)
             
             # Nút chỉnh sửa trạng thái  
             pygame.draw.rect(self.WINDOW, self.COLORS['BUTTON_DEFAULT'], edit_initial_rect, border_radius=6)
@@ -496,7 +541,17 @@ class PuzzleSolver:
                                             else:
                                                 print(f"{name} => solution = {self.solution}")
                                                 print(f"Thời gian thực thi: {execution_time:.4f} giây")
-                                                
+                                                # Đếm số node mở rộng nếu thuật toán trả về tuple
+                                                if isinstance(self.solution, tuple):
+                                                    solution, expansions = self.solution
+                                                    self.solution = solution
+                                                else:
+                                                    expansions = len(self.solution)
+
+                                                # Ghi vào bảng kết quả
+                                                self.result_table_data.append([
+                                                    name, f"{execution_time:.4f}", str(expansions), str(len(self.solution))
+                                                ])
                                                 # Chuẩn bị cho việc giải từng bước
                                                 self.solving = True
                                                 self.step_count = 0

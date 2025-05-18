@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/2636d481-22d6-4610-9c64-0cbdf6c6777c" alt="8-Puzzle Solver Logo" width="500"/>
-  <h1>8-Puzzle Solver Agent 🧩</h1>
+  <h1>8-Puzzle Solver Agent</h1>
   <p>Trò chơi giải đố 8-puzzle với nhiều nhóm thuật toán tìm kiếm AI</p>
 </div>
 
