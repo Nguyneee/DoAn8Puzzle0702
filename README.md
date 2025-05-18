@@ -117,7 +117,7 @@ Cụ thể, IDDFS bắt đầu bằng việc tìm kiếm từ độ sâu 0, sau 
 
 | Thuật toán     | Thời gian giải (ms) | Bộ nhớ sử dụng | Số bước tối ưu |
 |----------------|---------------------|----------------|----------------|
-| **Greedy**     | 50-150              | Thấp           | Thường không tối ưu |
+| **Greedy**     | 100-150              | Thấp           | Thường không tối ưu |
 | **A***         | 100-200             | Trung bình     | Luôn tối ưu    |
 | **IDA***       | 150-300             | Thấp           | Luôn tối ưu    |
 
@@ -187,9 +187,9 @@ lân cận hiện tại (không nhớ trạng thái toàn cục).
 
 | Thuật toán                | Thời gian giải (ms) | Bộ nhớ sử dụng | Khả năng tìm lời giải |
 |---------------------------|---------------------|----------------|------------------------|
-| **Hill Climbing**         | 30-50               | Rất thấp       | Có thể bị kẹt          |
-| **Steepest-Ascent HC**    | 30-50               | Rất thấp       | Có thể bị kẹt          |
-| **Stochastic HC**         | 40-60               | Rất thấp       | Có thể bị kẹt          |
+| **Hill Climbing**         | 50-100               | Rất thấp       | Có thể bị kẹt          |
+| **Steepest-Ascent HC**    | 50-100                   | Rất thấp       | Có thể bị kẹt          |
+| **Stochastic HC**         | 60-120               | Rất thấp       | Có thể bị kẹt          |
 | **Simulated Annealing**   | 100-150             | Rất thấp       | Thường gần tối ưu      |
 | **Genetic Algorithm**     | 200-350             | Trung bình     | Có thể tìm ra giải pháp tốt |
 | **Beam Search**| 100-250             | Trung bình     | Tìm được giải pháp tốt nhất |
@@ -229,9 +229,9 @@ lân cận hiện tại (không nhớ trạng thái toàn cục).
 
 | Thuật toán             | Thời gian giải (ms) | Bộ nhớ sử dụng | Đặc điểm |
 |------------------------|---------------------|----------------|----------|
-| **And-Or Search**      | 300-500             | Cao            | Tìm giải pháp tối ưu trong cây AND-OR |
-| **No Observation**     | 200-400             | Thấp           | Đưa ra kết quả chính xác trong điều kiện không quan sát |
-| **Partial Observable** | 150-300             | Trung bình     | Đưa ra kết quả với thông tin quan sát một phần |
+| **And-Or Search**      | 400-500             | Cao            | Tìm giải pháp tối ưu trong cây AND-OR |
+| **No Observation**     | 300-400             | Thấp           | Đưa ra kết quả chính xác trong điều kiện không quan sát |
+| **Partial Observable** | 250-300             | Trung bình     | Đưa ra kết quả với thông tin quan sát một phần |
 
 #### Nhận xét:
 - **And-Or Search** hiệu quả cho các bài toán có nhiều khả năng lựa chọn nhưng tốn nhiều bộ nhớ
@@ -273,8 +273,8 @@ lân cận hiện tại (không nhớ trạng thái toàn cục).
 | Thuật toán             | Thời gian giải (ms) | Bộ nhớ sử dụng | Đặc điểm |
 |------------------------|---------------------|----------------|----------|
 | **Backtracking**       | 50-150              | Thấp           | Tìm tất cả các giải pháp khả thi |
-| **AC3**                | 100-200             | Trung bình     | Cải thiện hiệu suất tìm kiếm bằng cách loại bỏ giá trị không hợp lệ |
-| **Constraint Checking**| 80-150              | Thấp           | Kiểm tra tính hợp lệ của các trạng thái |
+| **AC3**                | 150-200             | Trung bình     | Cải thiện hiệu suất tìm kiếm bằng cách loại bỏ giá trị không hợp lệ |
+| **Constraint Checking**| 100-150              | Thấp           | Kiểm tra tính hợp lệ của các trạng thái |
 
 #### Nhận xét:
 - **Backtracking** đơn giản và hiệu quả cho các bài toán nhỏ, nhưng có thể chậm với không gian trạng thái lớn
@@ -304,8 +304,8 @@ lân cận hiện tại (không nhớ trạng thái toàn cục).
 
 | Thuật toán             | Thời gian giải (ms) | Bộ nhớ sử dụng | Đặc điểm |
 |------------------------|---------------------|----------------|----------|
-| **Q-Learning**         | 1000ms - vài giây             | Cao            | Học dần dần chiến lược tối ưu |
-| **TD-Learning**         | 500ms – 1500ms            | Cao            | Cập nhật nhanh, không cần mô hình môi trường |
+| **Q-Learning**         | 1000 - vài giây             | Cao            | Học dần dần chiến lược tối ưu |
+| **TD-Learning**         | 500 – 1500          | Cao            | Cập nhật nhanh, không cần mô hình môi trường |
 
 #### Nhận xét:
 - **Q-Learning** có khả năng học và cải thiện hiệu suất theo thời gian, nhưng đòi hỏi nhiều tài nguyên
@@ -321,19 +321,30 @@ lân cận hiện tại (không nhớ trạng thái toàn cục).
 
 ### Nhận xét tổng quát
 
-- Các thuật toán tìm kiếm **không có thông tin** (BFS, DFS, UCS, IDDFS) phù hợp với bài toán nhỏ, ổn định nhưng dễ bị giới hạn bởi bộ nhớ hoặc thời gian trong các bài toán lớn hơn.
-- Nhóm thuật toán tìm kiếm **có thông tin** (A*, IDA*, Greedy) mang lại hiệu quả vượt trội nhờ tận dụng heuristic, đặc biệt A* cho kết quả tối ưu một cách đáng tin cậy.
-- **Local Search** cho thấy ưu thế về tốc độ và tiết kiệm bộ nhớ, tuy nhiên dễ bị rơi vào trạng thái cục bộ, trừ khi áp dụng các kỹ thuật như Simulated Annealing hoặc Genetic Algorithm.
-- Nhóm thuật toán tìm kiếm trong **môi trường phức tạp** như And-Or Search, Partial Observable, No Observation thể hiện khả năng thích nghi cao trong điều kiện thiếu thông tin hoặc không chắc chắn.
-- Các thuật toán tìm kiếm có **ràng buộc (CSP)** như Backtracking, AC3, Constraint Checking giúp nhanh chóng loại bỏ trạng thái không hợp lệ và làm nền tảng cho sinh lời giải ban đầu.
-- Thuật toán học tăng cường **Q-Learning** mang lại một góc nhìn khác khi bài toán được học thông qua tương tác thay vì duyệt toàn bộ không gian trạng thái.
+- CNhóm thuật toán không có thông tin như BFS, DFS, UCS, và IDDFS phù hợp với bài toán kích thước nhỏ và yêu cầu giải chính xác, nhưng có thể gặp hạn chế về hiệu suất nếu không kiểm soát tốt số lượng trạng thái mở rộng trong không gian lớn.
+- Tìm kiếm có thông tin (Informed Search) như A*, IDA*, và Greedy tận dụng tốt các hàm heuristic để dẫn hướng quá trình giải. Trong đó, A* cho kết quả rất chính xác và ổn định, còn Greedy tuy nhanh nhưng có thể bỏ sót lời giải tối ưu.
+- Tìm kiếm cục bộ (Local Search) hoạt động hiệu quả về mặt tốc độ và bộ nhớ, nhưng thường bị mắc kẹt tại cực trị địa phương. Việc sử dụng các biến thể như Simulated Annealing hoặc Genetic Algorithm giúp cải thiện khả năng thoát khỏi các điểm nghẽn này.
+- Tìm kiếm trong môi trường phức tạp (như AND-OR Search, Partial Observable, No Observation) là giải pháp phù hợp cho các bài toán không xác định hoặc không đầy đủ thông tin, nơi mà việc xác định một trạng thái cụ thể là không thể hoặc hành động có nhiều kết quả có thể xảy ra.
+- Bài toán ràng buộc (CSP) như các giải pháp Backtracking, AC3 và Constraint Checking cho phép rút gọn không gian tìm kiếm thông qua kiểm tra tính hợp lệ sớm, từ đó tăng khả năng tìm được lời giải hợp lệ nhanh hơn.
+- Học tăng cường (Reinforcement Learning) tiêu biểu là Q-Learning và TD-Learning, cho thấy khả năng học chính sách giải tối ưu thông qua trải nghiệm và phản hồi từ môi trường thay vì duyệt tuần tự. Đây là hướng tiếp cận mới mẻ và tiềm năng cho các hệ thống tự động thông minh.
 
 ### Hướng phát triển
 
-- Cải thiện tốc độ và bộ nhớ thông qua tối ưu thuật toán và cấu trúc dữ liệu.
-- Bổ sung các loại heuristic khác và cho phép người dùng tùy chọn trong giao diện.
-- Mở rộng trò chơi sang phiên bản lớn hơn như 15-puzzle hoặc 24-puzzle.
-- Tích hợp hệ thống giải thích trực quan từng bước tìm kiếm cho mục đích học tập và trình bày.
+-Tối ưu hóa hiệu năng: Nâng cao tốc độ xử lý và tiết kiệm bộ nhớ bằng cách cải tiến thuật toán tìm kiếm, giảm thiểu số lần mở rộng trạng thái trùng lặp và áp dụng các cấu trúc dữ liệu hiệu quả hơn như bảng băm hoặc priority queue cải tiến.
+
+-Bổ sung đa dạng hàm heuristic: Cho phép người dùng tùy chọn giữa nhiều loại hàm heuristic (Misplaced Tiles, Manhattan, Linear Conflict, v.v.), đồng thời đánh giá ảnh hưởng của mỗi loại đến hiệu suất và chất lượng lời giải.
+
+-Phát triển phiên bản mở rộng: Mở rộng ứng dụng để hỗ trợ các biến thể khó hơn như 15-Puzzle, 24-Puzzle, từ đó kiểm tra khả năng mở rộng (scalability) của thuật toán và giao diện.
+
+-Tích hợp trực quan hóa giải thuật: Cung cấp chế độ trình bày từng bước (step-by-step), giải thích logic tại mỗi bước đi (ví dụ: lý do chọn node này, giá trị h/g/f tương ứng...), hỗ trợ việc giảng dạy và học thuật.
+
+-Hỗ trợ người dùng nâng cao: Cho phép người dùng nhập code tùy chỉnh để tự thử nghiệm thuật toán mới, hoặc cho phép nạp thuật toán bên ngoài vào hệ thống để đánh giá và so sánh.
+
+-Lưu và tải trạng thái: Thêm tính năng lưu lại tiến trình giải, hoặc xuất log các bước để người dùng có thể tải về, chia sẻ hoặc kiểm chứng lại quá trình tìm kiếm.
+
+-Tích hợp benchmark và thống kê tự động: Ghi nhận thời gian, số bước, số node mở rộng và so sánh các thuật toán trên cùng một tập hợp trạng thái đầu vào để giúp người dùng lựa chọn giải pháp tối ưu hơn.
+
+-Hỗ trợ đa nền tảng: Phát triển phiên bản web bằng framework như React/PyScript hoặc phiên bản mobile để tiện sử dụng và chia sẻ rộng rãi.
 ---
 
 ## Cài Đặt và Chạy Game 
