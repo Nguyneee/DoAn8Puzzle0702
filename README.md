@@ -420,6 +420,7 @@ Mọi đóng góp đều được hoan nghênh! Nếu bạn muốn đóng góp, 
 - **MSSV**: 23110272 
 - **Môn học**: Trí Tuệ Nhân Tạo  
 - **Trường**: Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE)
+- **GVHD**: TS.PhanThị HuyềnTrang
   
 ## 📞 Liên hệ
 
