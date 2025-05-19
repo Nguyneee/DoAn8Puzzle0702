@@ -389,6 +389,9 @@ python -m DoAn8Puzzle.DoAnCaNhan
    - Thanh tiến trình sẽ cho bạn thấy tiến độ giải bài toán.
 ---
 
+## Video báo cáo
+
+Video Link: [https://drive.google.com/file/d/1lRrnNjQM4QTVw-QpC-bQH1wLrEU4KbqC/view?usp=sharing](https://drive.google.com/file/d/1lRrnNjQM4QTVw-QpC-bQH1wLrEU4KbqC/view?usp=sharing)
 ## 🧩 Cấu trúc dự án
 
 ```
